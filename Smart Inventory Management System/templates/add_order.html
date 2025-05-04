@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Add Order</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="flex justify-between items-center p-4 bg-white shadow-sm">
+                <h1 class="text-xl font-bold text-primary-color">VAL MotorGear Shop</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-secondary-color">Welcome, {{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="text-secondary-color hover:text-primary-color">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Create New Order</h2>
+                <a href="{{ url_for('orders') }}" class="text-secondary-color hover:text-primary-color">Back to Orders</a>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <form method="POST" action="{{ url_for('add_order') }}" class="space-y-4">
+                    <div class="form-group">
+                        <label for="supplier_id">Select Supplier</label>
+                        <select id="supplier_id" name="supplier_id" required class="form-select">
+                            <option value="">Select a supplier</option>
+                            {% for supplier in suppliers %}
+                            <option value="{{ supplier.id }}">
+                                {{ supplier.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expected_delivery">Expected Delivery Date</label>
+                        <input type="date" id="expected_delivery" name="expected_delivery" required class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="total_amount">Total Amount</label>
+                        <input type="number" id="total_amount" name="total_amount" required step="0.01" min="0" class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" rows="4" class="form-input"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Create Order</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

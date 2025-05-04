@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="flex justify-between items-center p-4 bg-white shadow-sm">
+                <h1 class="text-xl font-bold text-primary-color">VAL MotorGear Shop</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-secondary-color">Welcome, {{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="text-secondary-color hover:text-primary-color">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Profile Settings</h2>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Profile Information -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Profile Information</h3>
+                        <form method="POST" action="{{ url_for('update_profile') }}" class="space-y-4">
+                            <div class="form-group">
+                                <label for="full_name">Full Name</label>
+                                <input type="text" id="full_name" name="full_name" value="{{ current_user.full_name }}" required class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" value="{{ current_user.email }}" required class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone_number">Phone Number</label>
+                                <input type="tel" id="phone_number" name="phone_number" value="{{ current_user.phone_number }}" class="form-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address">Address</label>
+                                <textarea id="address" name="address" rows="4" class="form-input">{{ current_user.address }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profile_picture">Profile Picture</label>
+                                <input type="file" id="profile_picture" name="profile_picture" accept="image/*" class="form-input">
+                            </div>
+
+                            <button type="submit" class="btn-primary">Update Profile</button>
+                        </form>
+                    </div>
+
+                    <!-- Account Security -->
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Account Security</h3>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="text-gray-600 mb-4">Last password change: {{ current_user.last_password_change.strftime('%Y-%m-%d') if current_user.last_password_change else 'Never' }}</p>
+                            <button onclick="showChangePasswordModal()" class="btn-secondary">Change Password</button>
+                        </div>
+
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold mb-2">Two-Factor Authentication</h4>
+                            <p class="text-gray-600">Enhance your account security with 2FA</p>
+                            <button onclick="show2FAModal()" class="btn-secondary mt-2">Enable 2FA</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Change Password Modal -->
+        <div id="change-password-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="text-xl font-bold mb-4">Change Password</h2>
+                <form method="POST" action="{{ url_for('change_password') }}" class="space-y-4">
+                    <div class="form-group">
+                        <label for="current_password">Current Password</label>
+                        <input type="password" id="current_password" name="current_password" required class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new_password">New Password</label>
+                        <input type="password" id="new_password" name="new_password" required class="form-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm New Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required class="form-input">
+                    </div>
+
+                    <button type="submit" class="btn-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 2FA Modal -->
+        <div id="2fa-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2 class="text-xl font-bold mb-4">Enable Two-Factor Authentication</h2>
+                <div class="space-y-4">
+                    <p class="text-gray-600">To enhance your account security, we recommend enabling 2FA.</p>
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <p class="text-gray-600">Scan this QR code with your authenticator app:</p>
+                        <div id="qr-code-container" class="mt-4"></div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button onclick="generateQRCode()" class="btn-secondary">Generate QR Code</button>
+                        <button onclick="verify2FA()" class="btn-primary">Verify Code</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        function showChangePasswordModal() {
+            document.getElementById('change-password-modal').style.display = 'block';
+        }
+
+        function show2FAModal() {
+            document.getElementById('2fa-modal').style.display = 'block';
+        }
+
+        // Close modals
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Generate QR Code for 2FA
+        function generateQRCode() {
+            // This would typically make an API call to generate the QR code
+            // For now, we'll just show a placeholder
+            const qrCodeContainer = document.getElementById('qr-code-container');
+            qrCodeContainer.innerHTML = '<img src="placeholder-qr-code.png" alt="QR Code" class="w-48 h-48">';
+        }
+
+        // Verify 2FA code
+        function verify2FA() {
+            const code = prompt('Enter the code from your authenticator app:');
+            if (code) {
+                // This would typically make an API call to verify the code
+                alert('2FA code verified successfully!');
+                closeModal('2fa-modal');
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Close modals when clicking the close button
+        document.querySelectorAll('.close').forEach(button => {
+            button.onclick = function() {
+                this.parentElement.parentElement.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

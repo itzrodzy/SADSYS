@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Inventory Management</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="flex justify-between items-center p-4 bg-white shadow-sm">
+                <h1 class="text-xl font-bold text-primary-color">VAL MotorGear Shop</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-secondary-color">Welcome, {{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="text-secondary-color hover:text-primary-color">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="p-4">
+            <div class="dashboard">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-primary-color">Inventory Dashboard</h2>
+                    <button onclick="document.getElementById('addModal').style.display='block'" 
+                            class="bg-primary-color text-white px-4 py-2 rounded-md hover:bg-secondary-color">
+                        Add New Item
+                    </button>
+                </div>
+
+                <div class="inventory-grid">
+                    {% for item in items %}
+                        <div class="inventory-item">
+                            <h3 class="font-semibold text-lg mb-2">{{ item.item_name }}</h3>
+                            <div class="space-y-2">
+                                <p class="text-secondary-color">Category: {{ item.category }}</p>
+                                <p class="text-secondary-color">Supplier: {{ item.supplier }}</p>
+                                <p class="text-secondary-color">Quantity: {{ item.quantity }}</p>
+                                <p class="text-secondary-color">Price: ${{ "%.2f"|format(item.price) }}</p>
+                            </div>
+                            <div class="item-actions mt-4">
+                                <button onclick="editItem({{ item.id }})" class="edit">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
+                                    Edit
+                                </button>
+                                <button onclick="deleteItem({{ item.id }})" class="delete">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="text-xl font-bold mb-4">Add New Item</h2>
+            <form method="POST" action="{{ url_for('add_inventory') }}" class="space-y-4">
+                <div class="form-group">
+                    <label for="item_name" class="block mb-1 text-secondary-color">Item Name</label>
+                    <input type="text" id="item_name" name="item_name" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color">
+                </div>
+                <div class="form-group">
+                    <label for="category" class="block mb-1 text-secondary-color">Category</label>
+                    <select id="category" name="category" required 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color">
+                        <option value="parts">Parts</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="helmet">Helmet</option>
+                        <option value="gear">Gear</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="supplier" class="block mb-1 text-secondary-color">Supplier</label>
+                    <input type="text" id="supplier" name="supplier" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color">
+                </div>
+                <div class="form-group">
+                    <label for="quantity" class="block mb-1 text-secondary-color">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color">
+                </div>
+                <div class="form-group">
+                    <label for="reorder_level" class="block mb-1 text-secondary-color">Reorder Level</label>
+                    <input type="number" id="reorder_level" name="reorder_level" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color">
+                </div>
+                <div class="form-group">
+                    <label for="price" class="block mb-1 text-secondary-color">Price</label>
+                    <input type="number" id="price" name="price" step="0.01" required 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-color">
+                </div>
+                <button type="submit" class="w-full bg-primary-color text-white px-4 py-2 rounded-md hover:bg-secondary-color">
+                    Add Item
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 class="text-xl font-bold mb-4">Edit Item</h2>
+            <form id="editForm" method="POST" action="{{ url_for('update_item', item_id=0) }}" class="space-y-4">
+                <!-- Form fields will be populated by JavaScript -->
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='static.js') }}"></script>
+</body>
+</html>

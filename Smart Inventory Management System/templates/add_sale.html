@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Add Sale</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="flex justify-between items-center p-4 bg-white shadow-sm">
+                <h1 class="text-xl font-bold text-primary-color">VAL MotorGear Shop</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-secondary-color">Welcome, {{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="text-secondary-color hover:text-primary-color">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Record New Sale</h2>
+                <a href="{{ url_for('sales') }}" class="text-secondary-color hover:text-primary-color">Back to Sales</a>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <form method="POST" action="{{ url_for('add_sale') }}" class="space-y-4">
+                    <div class="form-group">
+                        <label for="item_id">Select Item</label>
+                        <select id="item_id" name="item_id" required class="form-select">
+                            <option value="">Select an item</option>
+                            {% for item in items %}
+                            <option value="{{ item.id }}">
+                                {{ item.item_name }} ({{ item.quantity }} in stock)
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" id="quantity" name="quantity" required min="1" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="sale_price">Sale Price</label>
+                            <input type="number" id="sale_price" name="sale_price" required step="0.01" min="0" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="customer_name">Customer Name</label>
+                            <input type="text" id="customer_name" name="customer_name" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer_contact">Customer Contact</label>
+                            <input type="tel" id="customer_contact" name="customer_contact" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes" rows="4" class="form-input"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Record Sale</button>
+                </form>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

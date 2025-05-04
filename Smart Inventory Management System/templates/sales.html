@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Sales</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <nav class="flex justify-between items-center p-4 bg-white shadow-sm">
+                <h1 class="text-xl font-bold text-primary-color">VAL MotorGear Shop</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-secondary-color">Welcome, {{ current_user.username }}</span>
+                    <a href="{{ url_for('logout') }}" class="text-secondary-color hover:text-primary-color">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Sales Management</h2>
+                <a href="{{ url_for('add_sale') }}" class="btn-primary">Record New Sale</a>
+            </div>
+
+            <div class="bg-white p-6 rounded-lg shadow">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">Sales Records</h3>
+                    <div class="flex space-x-4">
+                        <input type="date" class="form-input" id="date-filter">
+                        <input type="text" class="form-input" id="search-input" placeholder="Search sales...">
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Sale ID</th>
+                                <th class="text-left">Item</th>
+                                <th class="text-left">Quantity</th>
+                                <th class="text-left">Price</th>
+                                <th class="text-left">Total Amount</th>
+                                <th class="text-left">Customer</th>
+                                <th class="text-left">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-table-body">
+                            {% for sale in sales %}
+                            <tr>
+                                <td>{{ sale.id }}</td>
+                                <td>{{ sale.item.item_name }}</td>
+                                <td>{{ sale.quantity }}</td>
+                                <td>{{ "%.2f"|format(sale.sale_price) }}</td>
+                                <td>{{ "%.2f"|format(sale.total_amount) }}</td>
+                                <td>{{ sale.customer_name }}</td>
+                                <td>{{ sale.sale_date.strftime('%Y-%m-%d') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('date-filter').addEventListener('change', function() {
+            filterSales();
+        });
+
+        document.getElementById('search-input').addEventListener('input', function() {
+            filterSales();
+        });
+
+        function filterSales() {
+            const date = document.getElementById('date-filter').value;
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const rows = document.querySelectorAll('#sales-table-body tr');
+
+            rows.forEach(row => {
+                const saleDate = row.cells[6].textContent;
+                const customerName = row.cells[5].textContent.toLowerCase();
+                const matchesDate = !date || saleDate === date;
+                const matchesSearch = customerName.includes(search);
+                
+                row.style.display = matchesDate && matchesSearch ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

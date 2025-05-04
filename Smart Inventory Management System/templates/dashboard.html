@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #91B1E6;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .dashboard-container {
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background-color: #696969;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .sidebar-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            color: #e0e0e0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            border-left: 4px solid transparent;
+        }
+        
+        .sidebar-item.active {
+            background-color: #91B1E6;
+            border-left: 4px solid white;
+        }
+        
+        .sidebar-item:hover:not(.active) {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #c0c0c0;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex: 1;
+            margin-left: 240px;
+            padding: 1.5rem;
+            background-color: white;
+            min-height: 100vh;
+            border-top-left-radius: 20px;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Stats cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-icon {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .stat-number {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2563eb;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .content-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
+        }
+        
+        .chart-container {
+            height: 200px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .tab-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        
+        .tab-btn.active {
+            background-color: #2563eb;
+            color: white;
+        }
+        
+        .tab-btn:not(.active) {
+            background-color: #e5e7eb;
+            color: #6b7280;
+        }
+        
+        /* Tables */
+        .grid-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .grid-table th,
+        .grid-table td {
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        
+        .grid-table th {
+            color: #6b7280;
+            font-weight: 500;
+        }
+        
+        .grid-table td {
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        /* In Stock Page Styles */
+        .content-header-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .new-stock-btn {
+            background-color: #3D5A80;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        .search-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .search-input-wrapper {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1rem;
+            height: 1rem;
+            color: #6b7280;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+        
+        .status-btn {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .arrow-down {
+            margin-left: 0.5rem;
+            font-size: 0.625rem;
+        }
+        
+        .inventory-table-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .inventory-table th,
+        .inventory-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+        
+        .inventory-table th {
+            background-color: #f9fafb;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .inventory-table td {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-warning {
+            background-color: #fff7ed;
+            color: #c2410c;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .page-btn {
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            background-color: white;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+        
+        .page-active {
+            background-color: #3D5A80;
+            color: white;
+            border-color: #3D5A80;
+        }
+    </style>
+</head>
+<body style="font-family: 'Inter', sans-serif; background-color: #91B1E6; margin: 0; padding: 0;">
+    <div style="display: flex;">
+        <!-- Sidebar -->
+        <div style="width: 240px; background-color: #696969; height: 100vh; position: fixed; left: 0; top: 0; display: flex; flex-direction: column; z-index: 100;">
+            <a href="{{ url_for('dashboard') }}" class="sidebar-item active" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: #c0c0c0; border-radius: 4px; margin-right: 10px;"></div>
+                Dashboard
+            </a>
+            <a href="{{ url_for('inventory') }}" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: #c0c0c0; border-radius: 4px; margin-right: 10px;"></div>
+                In Stock
+            </a>
+            <a href="#" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: #c0c0c0; border-radius: 4px; margin-right: 10px;"></div>
+                Products
+            </a>
+            <a href="#" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: #c0c0c0; border-radius: 4px; margin-right: 10px;"></div>
+                Sales
+            </a>
+            <a href="#" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: #c0c0c0; border-radius: 4px; margin-right: 10px;"></div>
+                Orders
+            </a>
+            <a href="#" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: #c0c0c0; border-radius: 4px; margin-right: 10px;"></div>
+                Reports
+            </a>
+            <a href="#" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: transparent; margin-right: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 20px; height: 20px; color: #c0c0c0;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+                Users
+            </a>
+            <a href="#" class="sidebar-item" style="color: #e0e0e0; text-decoration: none; display: flex; align-items: center; padding: 0.75rem 1rem;">
+                <div class="sidebar-icon" style="width: 20px; height: 20px; background-color: transparent; margin-right: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="width: 20px; height: 20px; color: #c0c0c0;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                Settings
+            </a>
+        </div>
+        
+        <!-- Main Content -->
+        <div style="flex: 1; margin-left: 240px; padding: 1.5rem; background-color: white; min-height: 100vh; border-top-left-radius: 20px; box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);">
+            <!-- Header with page title and action button -->
+            <div class="content-header-main">
+                <div class="page-title">In Stock</div>
+                <button class="new-stock-btn">+ New Stock</button>
+            </div>
+            
+            <!-- Search bar -->
+            <div class="search-container">
+                <div class="search-input-wrapper">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Quick search...">
+                </div>
+                <div class="status-filter">
+                    <button class="status-btn">Status <span class="arrow-down">▼</span></button>
+                </div>
+            </div>
+            
+            <!-- Inventory Table -->
+            <div class="inventory-table-container">
+                <table class="inventory-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="select-all-checkbox"></th>
+                            <th>Order ID</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Sales channel</th>
+                            <th>Instruction</th>
+                            <th>Items</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>order #{{ item.id }}</td>
+                            <td>{{ item.item_name }}</td>
+                            <td>{{ item.category }}</td>
+                            <td>Store counter</td>
+                            <td>First use guidance</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>
+                                <span class="status-badge {% if item.quantity > item.reorder_level %}status-active{% else %}status-warning{% endif %}">
+                                    {% if item.quantity > item.reorder_level %}In Stock{% else %}Low Stock{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>order #1</td>
+                            <td>Helmet</td>
+                            <td>Head</td>
+                            <td>Store counter</td>
+                            <td>First use guidance</td>
+                            <td>55/100</td>
+                            <td><span class="status-badge status-active">In Stock</span></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>order #2</td>
+                            <td>Generator</td>
+                            <td>Light</td>
+                            <td>Store counter</td>
+                            <td>First use guidance</td>
+                            <td>34/100</td>
+                            <td><span class="status-badge status-active">In Stock</span></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>order #3</td>
+                            <td>Charger</td>
+                            <td>Light</td>
+                            <td>Store counter</td>
+                            <td>First use guidance</td>
+                            <td>55/100</td>
+                            <td><span class="status-badge status-active">In Stock</span></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>order #4</td>
+                            <td>Brake</td>
+                            <td>Light</td>
+                            <td>Store counter</td>
+                            <td>First use guidance</td>
+                            <td>55/100</td>
+                            <td><span class="status-badge status-active">In Stock</span></td>
+                        </tr>
+                        <tr>
+                            <td><input type="checkbox" class="row-checkbox"></td>
+                            <td>order #5</td>
+                            <td>Clutch</td>
+                            <td>Light</td>
+                            <td>Store counter</td>
+                            <td>First use guidance</td>
+                            <td>55/100</td>
+                            <td><span class="status-badge status-active">In Stock</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="page-btn">Prev</button>
+                <button class="page-btn page-active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">Next</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sales Chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Sales',
+                        data: [65, 59, 80, 81, 56, 55],
+                        backgroundColor: '#3b82f6',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Target',
+                        data: [70, 65, 85, 85, 60, 60],
+                        backgroundColor: '#fcd34d',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'end'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

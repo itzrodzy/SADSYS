@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAL MotorGear - Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/design.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            font-family: 'Nunito', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            letter-spacing: 0.2px;
+        }
+        
+        .signup-container {
+            background-color: rgba(80, 80, 80, 0.85);
+            border-radius: 1rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+        
+        .signup-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .signup-header h1 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .signup-header p {
+            color: #d9d9d9;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: white;
+            margin-bottom: 0.35rem;
+            font-weight: 600;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d9d9d9;
+            border-radius: 0.25rem;
+            background-color: white;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-checkbox {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-checkbox input {
+            margin-right: 0.5rem;
+        }
+        
+        .form-checkbox label {
+            color: #d9d9d9;
+            font-size: 0.75rem;
+            text-transform: none;
+            margin-bottom: 0;
+        }
+        
+        .signup-btn {
+            width: 100%;
+            max-width: 200px;
+            padding: 0.85rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        
+        .signup-btn:hover {
+            background-color: #81a4cd;
+            transform: translateY(-2px);
+        }
+        
+        .login-link {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #d9d9d9;
+        }
+        
+        .login-link a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-container">
+        <div class="signup-header">
+            <h1>Register</h1>
+            <p>Welcome to VAL MotorGear Inventory Management System! You'll get full access once your personal account and login setting up are complete.</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('signup') }}" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="first_name">First name</label>
+                    <input type="text" id="first_name" name="first_name" class="form-input" placeholder="Enter your name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="last_name">Last name</label>
+                    <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Enter your surname" required>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Choose a username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone_number">Phone number</label>
+                    <input type="tel" id="phone_number" name="phone_number" class="form-input" placeholder="Enter your phone number" required>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="address">Address</label>
+                    <input type="text" id="address" name="address" class="form-input" placeholder="Enter your address" required>
+                </div>
+                
+                <div class="form-group full-width">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter password" required>
+                </div>
+                
+                <div class="form-group full-width form-checkbox">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms">I agree to the Terms and Conditions and Privacy Policy</label>
+                </div>
+            </div>
+            
+            <input type="hidden" name="profile_picture" value="default.png">
+            <input type="hidden" id="full_name" name="full_name">
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-error">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <button type="submit" class="signup-btn">Sign Up</button>
+            
+            <div class="login-link">
+                Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        // Combine first and last name into full_name field before submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const firstName = document.getElementById('first_name').value;
+            const lastName = document.getElementById('last_name').value;
+            document.getElementById('full_name').value = firstName + ' ' + lastName;
+        });
+    </script>
+</body>
+</html>
