@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize modals
     initModals();
     
+    // Setup Sale Details Modal close button
+    document.querySelectorAll('#sale-details-modal .close-modal').forEach(button => {
+        button.addEventListener('click', function() {
+            document.getElementById('sale-details-modal').classList.remove('show');
+        });
+    });
+    
     // Load initial data
     loadDashboardData();
     refreshProductsData();
@@ -24,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Initialize sorting functionality for all sortable tables
         initTableSorting();
+        
+        // Initialize activity tabs
+        initActivityTabs();
     }
 });
 
@@ -923,6 +933,15 @@ function addProduct(product) {
         closeModal('product-modal');
         showNotification('Product added successfully');
         loadProductsData();
+        
+        // Track product addition in history
+        trackProductHistory('added', data.id || 'new', product.name);
+        
+        // Refresh dashboard if we're on the dashboard page
+        if (typeof window.refreshDashboardActivities === 'function') {
+            window.refreshDashboardActivities();
+        }
+        
         // Refresh products in inventory dropdown
         loadProductsForInventory();
         // Also refresh products in sales dropdown
@@ -982,49 +1001,199 @@ function updateProduct(productId, product) {
 }
 
 function deleteProduct(productId) {
-    fetch(`/api/products/${productId}`, {
-        method: 'DELETE'
-    })
-    .then(res => res.json())
-    .then(data => {
-        showNotification('Product deleted successfully');
-        loadProductsData();
-    })
-    .catch(error => {
-        console.error('Error deleting product:', error);
-        showNotification('Error deleting product', 'error');
-    });
+    // Get the product name before deletion for history tracking
+    fetch(`/api/products/${productId}`)
+        .then(res => res.json())
+        .then(productData => {
+            const productName = productData.name || `Product #${productId}`;
+            
+            // Proceed with deletion
+            return fetch(`/api/products/${productId}`, {
+                method: 'DELETE'
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        throw new Error(text || `Server returned ${res.status}`);
+                    });
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log('Product deletion response:', data);
+                showNotification('Product deleted successfully');
+                loadProductsData();
+                
+                // Track product deletion in history
+                trackProductHistory('deleted', productId, productName);
+                
+                // Refresh dashboard if we're on the dashboard page
+                if (typeof window.refreshDashboardActivities === 'function') {
+                    window.refreshDashboardActivities();
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error deleting product:', error);
+            showNotification(`Error deleting product: ${error.message || 'Unknown error'}`, 'error');
+        });
+}
+
+// View sale details - improved functionality
+function viewSaleDetails(saleId) {
+    console.log('Viewing sale details for ID:', saleId);
+    // Show loading overlay instead of just a notification
+    showLoading('Loading sale details...');
+    
+    // Fetch the sale data directly
+    fetch(`/api/sales?id=${saleId}`)
+        .then(res => {
+            console.log('Sale API response status:', res.status);
+            if (!res.ok) {
+                return res.text().then(text => {
+                    throw new Error(text || `Server returned ${res.status}`);
+                });
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log('Sale data received:', data);
+            // Get the sale from the array (should be just one)
+            const sale = data.sales.find(s => s.id === parseInt(saleId));
+            console.log('Found sale:', sale);
+            if (!sale) {
+                throw new Error('Sale not found');
+            }
+            
+            // Populate the modal with sale details
+            document.getElementById('sale-detail-id').textContent = sale.id;
+            document.getElementById('sale-detail-date').textContent = sale.date || 'N/A';
+            document.getElementById('sale-detail-customer').textContent = sale.customer || 'N/A';
+            document.getElementById('sale-detail-payment').textContent = sale.payment_method || 'N/A';
+            document.getElementById('sale-detail-channel').textContent = sale.channel || 'N/A';
+            document.getElementById('sale-detail-subtotal').textContent = `₱${parseFloat(sale.subtotal).toFixed(2)}`;
+            document.getElementById('sale-detail-tax').textContent = `₱${parseFloat(sale.tax).toFixed(2)}`;
+            document.getElementById('sale-detail-total').textContent = `₱${parseFloat(sale.total).toFixed(2)}`;
+            document.getElementById('sale-detail-notes').textContent = sale.notes || 'No notes available';
+            
+            // Populate items table
+            const itemsBody = document.getElementById('sale-detail-items');
+            itemsBody.innerHTML = '';
+            
+            if (sale.items && sale.items.length > 0) {
+                sale.items.forEach(item => {
+                    const subtotal = parseFloat(item.price) * item.quantity;
+                    itemsBody.innerHTML += `
+                        <tr>
+                            <td>${item.product_name}</td>
+                            <td>${item.quantity}</td>
+                            <td>₱${parseFloat(item.price).toFixed(2)}</td>
+                            <td>${item.location || 'Main Storage'}</td>
+                            <td>₱${subtotal.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                itemsBody.innerHTML = `<tr><td colspan="5" class="empty-table">No items found</td></tr>`;
+            }
+            
+            // Show the modal using the dashboard's showModal function
+            showModal('sale-details-modal');
+            
+            // Hide the loading overlay
+            hideLoading();
+        })
+        .catch(error => {
+            // Hide the loading overlay first
+            hideLoading();
+            
+            console.error('Error loading sale details:', error);
+            showNotification(`Error loading sale details: ${error.message || 'Unknown error'}`, 'error');
+        });
 }
 
 // Delete a sale
 function deleteSale(saleId) {
+    // Show loading notification
+    showNotification('Deleting sale...', 'info');
+    
     fetch(`/api/sales/delete/${saleId}`, {
         method: 'DELETE'
     })
-    .then(res => res.json())
+    .then(res => {
+        // Check if the response is ok before parsing JSON
+        if (!res.ok) {
+            // Parse error response
+            return res.json().then(errData => {
+                throw new Error(errData.error || `Server returned ${res.status}`);
+            }).catch(e => {
+                // If parsing JSON fails, fall back to text
+                return res.text().then(text => {
+                    throw new Error(text || `Server returned ${res.status}`);
+                });
+            });
+        }
+        return res.json();
+    })
     .then(data => {
+        console.log('Sale deletion response:', data);
         showNotification('Sale deleted successfully');
         loadSalesData();
+        
+        // Refresh dashboard activities if the function exists
+        if (typeof window.refreshDashboardActivities === 'function') {
+            window.refreshDashboardActivities();
+        }
     })
     .catch(error => {
         console.error('Error deleting sale:', error);
-        showNotification('Error deleting sale', 'error');
+        // Show a more user-friendly error message
+        const errorMsg = error.message && error.message.includes('not found') ?
+            'This sale no longer exists or has already been deleted.' :
+            `Error deleting sale: ${error.message || 'Unknown error. Please try again.'}`;
+        showNotification(errorMsg, 'error');
     });
 }
 
 // Delete an order
 function deleteOrder(orderId) {
+    // Show loading notification
+    showNotification('Deleting order...', 'info');
+    
     fetch(`/api/orders/delete/${orderId}`, {
         method: 'DELETE'
     })
-    .then(res => res.json())
+    .then(res => {
+        if (!res.ok) {
+            // Parse error response
+            return res.json().then(errData => {
+                throw new Error(errData.error || `Server returned ${res.status}`);
+            }).catch(e => {
+                // If parsing JSON fails, fall back to text
+                return res.text().then(text => {
+                    throw new Error(text || `Server returned ${res.status}`);
+                });
+            });
+        }
+        return res.json();
+    })
     .then(data => {
+        console.log('Order deletion response:', data);
         showNotification('Order deleted successfully');
         loadOrdersData();
+        
+        // Refresh dashboard activities if the function exists
+        if (typeof window.refreshDashboardActivities === 'function') {
+            window.refreshDashboardActivities();
+        }
     })
     .catch(error => {
         console.error('Error deleting order:', error);
-        showNotification('Error deleting order', 'error');
+        // Show a more user-friendly error message
+        const errorMsg = error.message && error.message.includes('not found') ?
+            'This order no longer exists or has already been deleted.' :
+            `Error deleting order: ${error.message || 'Unknown error. Please try again.'}`;
+        showNotification(errorMsg, 'error');
     });
 }
 
@@ -1223,20 +1392,26 @@ function editInventory(inventoryId) {
 
 // Delete inventory item
 function deleteInventory(inventoryId) {
-    if (confirm('Are you sure you want to delete this inventory item?')) {
-        fetch(`/api/inventory/${inventoryId}`, {
-            method: 'DELETE'
-        })
-        .then(res => res.json())
-        .then(data => {
-            showNotification('Inventory deleted successfully');
-            loadInventoryData();
-        })
-        .catch(error => {
-            console.error('Error deleting inventory:', error);
-            showNotification('Error deleting inventory', 'error');
-        });
-    }
+    fetch(`/api/inventory/${inventoryId}`, {
+        method: 'DELETE'
+    })
+    .then(res => {
+        if (!res.ok) {
+            return res.text().then(text => {
+                throw new Error(text || `Server returned ${res.status}`);
+            });
+        }
+        return res.json();
+    })
+    .then(data => {
+        console.log('Inventory deletion response:', data);
+        showNotification('Inventory item deleted successfully');
+        loadInventoryData();
+    })
+    .catch(error => {
+        console.error('Error deleting inventory:', error);
+        showNotification(`Error deleting inventory: ${error.message || 'Unknown error'}`, 'error');
+    });
 }
 
 // ----------------------
@@ -1337,7 +1512,7 @@ function updateSalesTable(sales) {
                 <td>${sale.payment_method || 'N/A'}</td>
                 <td>${sale.channel || 'N/A'}</td>
                 <td class="actions-cell">
-                    <button class="action-btn view-btn" data-id="${sale.id}">
+                    <button class="action-btn view-btn" data-id="${sale.id}" onclick="viewSaleDetails(${sale.id})">
                         <i class="fas fa-eye"></i>
                     </button>
                     <button class="action-btn delete-btn" data-id="${sale.id}" onclick="confirmDelete('sale', ${sale.id})">
@@ -1473,9 +1648,16 @@ function initSalesModal() {
             .then(data => {
                 closeModal('sales-modal');
                 showNotification('Sale recorded successfully');
+                
+                
                 // Refresh sales data if on sales tab
                 if (document.querySelector('.tab-content.active').id === 'sales-tab') {
                     loadSalesData();
+                }
+                
+                // Refresh dashboard activities to ensure sale shows in activity/history
+                if (typeof window.refreshDashboardActivities === 'function') {
+                    window.refreshDashboardActivities();
                 }
             })
             .catch(error => {
@@ -1928,18 +2110,47 @@ function initOrderModal() {
             .then(data => {
                 closeModal('order-modal');
                 showNotification(`Order ${orderId ? 'updated' : 'created'} successfully`);
+                
+                
                 // Refresh orders data if on orders tab
                 if (document.querySelector('.tab-content.active').id === 'orders-tab') {
                     loadOrdersData();
                 }
                 // Also refresh dashboard data to show recent activities
                 loadDashboardData();
+                
+                // Refresh dashboard activities specifically to ensure order shows in Recent Activity
+                if (typeof window.refreshDashboardActivities === 'function') {
+                    window.refreshDashboardActivities();
+                }
             })
             .catch(error => {
                 console.error('Error saving order:', error);
                 showNotification('Error saving order', 'error');
             });
         });
+    }
+}
+
+
+
+// ----------------------
+// Product History Tracking
+// ----------------------
+
+/**
+ * Track product addition or deletion in history
+ * @param {string} action - 'added' or 'deleted'
+ * @param {number} productId - The ID of the product
+ * @param {string} productName - The name of the product 
+ */
+function trackProductHistory(action, productId, productName) {
+    console.log(`Tracking product ${action}: ${productName} (ID: ${productId})`);
+    
+    // If we're on the dashboard page, refresh the history tab
+    if (typeof window.fetchProductHistory === 'function') {
+        // Expose fetchProductHistory globally from dashboard-activity.js
+        window.fetchProductHistory();
     }
 }
 
@@ -1950,10 +2161,17 @@ function initOrderModal() {
 function initDeleteConfirmModal() {
     const cancelDeleteBtn = document.getElementById('cancel-delete');
     const confirmDeleteBtn = document.getElementById('confirm-delete');
+    const closeModalBtn = document.querySelector('#delete-confirm-modal .close-modal');
     
     if (cancelDeleteBtn) {
         cancelDeleteBtn.addEventListener('click', function() {
-            closeModal('delete-confirm-modal');
+            hideModal('delete-confirm-modal');
+        });
+    }
+    
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', function() {
+            hideModal('delete-confirm-modal');
         });
     }
     
@@ -1971,15 +2189,30 @@ function initDeleteConfirmModal() {
 }
 
 function confirmDelete(itemType, itemId) {
+    console.log(`Confirming delete for ${itemType} with ID: ${itemId}`);
     const confirmDeleteBtn = document.getElementById('confirm-delete');
     if (confirmDeleteBtn) {
         confirmDeleteBtn.setAttribute('data-type', itemType);
         confirmDeleteBtn.setAttribute('data-id', itemId);
-        openModal('delete-confirm-modal');
+        
+        // Set up click handler for the confirm button
+        confirmDeleteBtn.onclick = function() {
+            deleteItem(itemType, itemId);
+        };
+        
+        // Use the standard modal display function
+        showModal('delete-confirm-modal');
     }
 }
 
 function deleteItem(itemType, itemId) {
+    // Close the confirmation modal
+    hideModal('delete-confirm-modal');
+    
+    // Show loading notification
+    showNotification(`Deleting ${itemType}...`, 'info');
+    
+    // Detect item type and call appropriate delete function
     switch(itemType) {
         case 'product':
             deleteProduct(itemId);
@@ -1995,6 +2228,7 @@ function deleteItem(itemType, itemId) {
             break;
         default:
             console.error('Unknown item type:', itemType);
+            showNotification(`Error: Unknown item type '${itemType}'`, 'error');
     }
 }
 
@@ -2028,24 +2262,45 @@ function deleteOrder(orderId) {
 
 function getStatusBadge(status) {
     const statusLower = status ? status.toLowerCase() : 'pending';
-    return `<span class="status-badge status-${statusLower}">${status || 'Pending'}</span>`;
+    let emoji = '🟡'; // Default yellow for pending
+    
+    // Set appropriate emoji based on status
+    if (statusLower === 'confirmed' || statusLower === 'approved') {
+        emoji = '🟢'; // Green for confirmed/approved
+    } else if (statusLower === 'cancelled') {
+        emoji = '🔴'; // Red for cancelled
+    } else if (statusLower === 'completed' || statusLower === 'delivered' || statusLower === 'shipped') {
+        emoji = '🔵'; // Blue for completed/delivered/shipped
+    }
+    
+    return `<span class="status-badge status-${statusLower}">${emoji} ${status || 'Pending'}</span>`;
 }
 
 function showNotification(message, type = 'success') {
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.innerHTML = message;
-    
-    document.body.appendChild(notification);
-    
-    // Show notification
-    setTimeout(() => notification.classList.add('show'), 10);
-    
-    // Hide and remove notification after 3 seconds
-    setTimeout(() => {
+    const notification = document.getElementById('notification');
+    if (notification) {
+        // Set message text
+        notification.textContent = message;
+        
+        // Set appropriate class based on type
+        notification.className = 'notification';
+        notification.classList.add(type);
+        
+        // Show the notification
+        notification.classList.add('show');
+        
+        // Automatically hide after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, 3000);
+    }
+}
+
+function hideNotification() {
+    const notification = document.getElementById('notification');
+    if (notification) {
         notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+    }
 }
 
 function initTableSorting() {
@@ -2285,37 +2540,67 @@ function initSearchFilters() {
     // Inventory search
     const inventorySearch = document.getElementById('inventory-search');
     if (inventorySearch) {
-        inventorySearch.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                const searchTerm = this.value.trim();
-                // Implement inventory search when API is ready
-                console.log(`Searching inventory: ${searchTerm}`);
+        inventorySearch.addEventListener('keyup', debounce(function(e) {
+            const searchTerm = this.value.trim();
+            if (searchTerm) {
+                fetch(`/api/inventory?search=${encodeURIComponent(searchTerm)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        updateInventoryTable(data.inventory);
+                    })
+                    .catch(error => {
+                        console.error('Error searching inventory:', error);
+                        showNotification('Error searching inventory', 'error');
+                    });
+            } else if (e.key === 'Backspace' && searchTerm === '') {
+                // If search is cleared, load all inventory
+                loadInventoryData();
             }
-        });
+        }, 300));
     }
     
     // Sales search
     const salesSearch = document.getElementById('sales-search');
     if (salesSearch) {
-        salesSearch.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                const searchTerm = this.value.trim();
-                // Implement sales search when API is ready
-                console.log(`Searching sales: ${searchTerm}`);
+        salesSearch.addEventListener('keyup', debounce(function(e) {
+            const searchTerm = this.value.trim();
+            if (searchTerm) {
+                fetch(`/api/sales?search=${encodeURIComponent(searchTerm)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        updateSalesTable(data.sales);
+                    })
+                    .catch(error => {
+                        console.error('Error searching sales:', error);
+                        showNotification('Error searching sales', 'error');
+                    });
+            } else if (e.key === 'Backspace' && searchTerm === '') {
+                // If search is cleared, load all sales
+                loadSalesData();
             }
-        });
+        }, 300));
     }
     
     // Orders search
     const ordersSearch = document.getElementById('orders-search');
     if (ordersSearch) {
-        ordersSearch.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                const searchTerm = this.value.trim();
-                // Implement orders search when API is ready
-                console.log(`Searching orders: ${searchTerm}`);
+        ordersSearch.addEventListener('keyup', debounce(function(e) {
+            const searchTerm = this.value.trim();
+            if (searchTerm) {
+                fetch(`/api/orders?search=${encodeURIComponent(searchTerm)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        updateOrdersTable(data.orders);
+                    })
+                    .catch(error => {
+                        console.error('Error searching orders:', error);
+                        showNotification('Error searching orders', 'error');
+                    });
+            } else if (e.key === 'Backspace' && searchTerm === '') {
+                // If search is cleared, load all orders
+                loadOrdersData();
             }
-        });
+        }, 300));
     }
     
     // Global search handling

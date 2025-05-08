@@ -6,7 +6,207 @@ body {
     color: #333333;
 }
 
-/* Login/Signup Containers */
+/* Authentication Pages Styling */
+.auth-page {
+    background-color: #f5f5f5;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.auth-container {
+    display: flex;
+    width: 1000px;
+    height: 600px;
+    max-width: 90vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.auth-sidebar {
+    width: 40%;
+    background-color: #000000;
+    color: white;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.auth-content {
+    width: 60%;
+    padding: 20px 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    overflow-y: auto;
+}
+
+.auth-form-container {
+    width: 100%;
+    max-width: 380px;
+    padding: 25px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-info {
+    margin-top: 60px;
+}
+
+.auth-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-info p {
+    opacity: 0.8;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.auth-features {
+    margin-top: 40px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.feature-item i {
+    font-size: 1.2rem;
+    color: #FDC500;
+}
+
+.auth-form-container h2 {
+    font-size: 1.7rem;
+    margin-bottom: 10px;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.auth-form-container h2 i {
+    color: #FDC500;
+    font-size: 1.5rem;
+}
+
+.auth-subtitle {
+    color: #666;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 8px;
+}
+
+.form-group {
+    width: 100%;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group label i {
+    width: 20px;
+    margin-right: 8px;
+    font-size: 15px;
+    color: #FDC500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: #FDC500;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(253, 197, 0, 0.2);
+}
+
+.login-btn, .signup-btn {
+    margin-top: 5px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #FDC500;
+    border: none;
+    color: #000;
+    font-weight: 500;
+    transition: background-color 0.2s, transform 0.1s;
+    cursor: pointer;
+}
+
+.login-btn:hover, .signup-btn:hover {
+    background-color: #e0b000;
+}
+
+.login-btn i, .signup-btn i {
+    width: 20px;
+    margin-right: 4px;
+    font-size: 15px;
+}
+
+.auth-footer {
+    margin-top: 25px;
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+}
+
+.auth-link {
+    color: #FDC500;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.auth-link:hover {
+    color: #e0b000;
+    text-decoration: underline;
+}
+
+/* Legacy Login/Signup Containers (keeping for backward compatibility) */
 .centered-container {
     width: 400px;
     margin: 60px auto;
@@ -268,6 +468,24 @@ body {
     color: #333333;
 }
 
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-left: 10px;
+    transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+    background-color: #f1f1f1;
+    color: #e74c3c;
+}
+
 .header-actions button {
     background: none;
     border: none;
@@ -304,9 +522,18 @@ body {
 
 /* Dashboard styles */
 .dashboard-wrapper {
-    padding: 20px 25px;
+    padding: 25px 25px;
     max-width: 1800px;
     margin: 0 auto;
+}
+
+/* Dashboard Stats Container */
+.dashboard-stats {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 15px;
+    margin-bottom: 35px;
+    width: 100%;
 }
 
 /* Dashboard Header */
@@ -314,9 +541,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 30px;
     border-bottom: 1px solid #eaeaea;
-    padding-bottom: 15px;
+    padding: 12px 0 20px 0;
 }
 
 .dashboard-header h1 {
@@ -371,21 +598,36 @@ body {
     background-color: #F57C00;
 }
 
+/* Dashboard Sections & Headers */
+.dashboard-section-header {
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.dashboard-section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary, #333);
+    margin: 0;
+}
+
 /* Dashboard Cards & Rows */
 .dashboard-row {
     display: flex;
     gap: 25px;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    margin-top: 0;
 }
 
 .dashboard-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-    padding: 25px;
+    background-color: var(--card-bg, #fff);
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    padding: 22px;
     flex: 1;
     min-height: 280px;
-    transition: box-shadow 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .dashboard-card:hover {
@@ -402,12 +644,149 @@ body {
 }
 
 .card-title {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
-    color: #333;
-    margin: 0 0 20px 0;
+    color: var(--text-primary, #333);
+    margin: 0 0 18px 0;
     padding-bottom: 12px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid #eaeaea;
+}
+
+/* Recent Activity Styles */
+.activity-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 10px;
+}
+
+.activity-tab {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.activity-tab.active {
+    border-bottom: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.activity-content {
+    padding: 10px 0;
+}
+
+.activity-content.hidden {
+    display: none;
+}
+
+
+
+.activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Product History Styling */
+.added-item .activity-icon {
+    background-color: rgba(40, 167, 69, 0.15);
+    color: #28a745;
+}
+
+.deleted-item .activity-icon {
+    background-color: rgba(220, 53, 69, 0.15);
+    color: #dc3545;
+}
+
+.activity-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-description {
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.activity-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.action-type {
+    font-weight: 600;
+}
+
+.added-item .action-type {
+    color: #28a745;
+}
+
+.deleted-item .action-type {
+    color: #dc3545;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: #e6f7ff;
+    color: #2196F3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.activity-details {
+    flex: 1;
+}
+
+.activity-description {
+    margin-bottom: 4px;
+    color: var(--text-color);
+}
+
+.activity-time {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.activity-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.activity-user {
+    font-weight: 500;
+}
+
+.empty-message {
+    padding: 15px 0;
+    text-align: center;
+    color: var(--text-secondary, #777);
+    font-style: italic;
 }
 
 /* Chart Containers */
@@ -722,38 +1101,93 @@ body {
 }
 
 .stat-card {
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    padding: 20px;
+    background-color: var(--card-bg, #fff);
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    padding: 18px;
     display: flex;
     align-items: center;
     transition: all 0.3s ease;
-    height: 100%;
+    min-height: 100px;
     overflow: hidden;
     position: relative;
+    margin-bottom: 0;
+    border: none;
+    flex: 1;
 }
 
 .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover .stat-icon {
+    transform: scale(1.05);
+}
+
+/* Add subtle accent border to the left side of each stat card */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px;
+    background-color: transparent;
+    transition: all 0.3s ease;
+    border-radius: 4px 0 0 4px;
+}
+
+.stat-card:nth-child(1)::before {
+    background-color: #2196F3;
+}
+
+.stat-card:nth-child(2)::before {
+    background-color: #4CAF50;
+}
+
+.stat-card:nth-child(3)::before {
+    background-color: #FDC500;
+}
+
+.stat-card:nth-child(4)::before {
+    background-color: #F44336;
 }
 
 .stat-icon {
     width: 48px;
     height: 48px;
-    background: #f0f7ff;
+    background: #f8f9fa;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 16px;
     flex-shrink: 0;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
 }
 
 .stat-icon i {
     font-size: 24px;
     color: #2196F3;
+    transition: all 0.3s ease;
+}
+
+/* Custom colors for different stat types */
+.stat-card:nth-child(1) .stat-icon i {
+    color: #2196F3;
+}
+
+.stat-card:nth-child(2) .stat-icon i {
+    color: #4CAF50;
+}
+
+.stat-card:nth-child(3) .stat-icon i {
+    color: #FDC500;
+}
+
+.stat-card:nth-child(4) .stat-icon i {
+    color: #F44336;
 }
 
 .stat-content {
@@ -761,29 +1195,30 @@ body {
 }
 
 .stat-content h3 {
-    font-size: 13px;
-    color: #666;
-    margin: 0 0 8px 0;
-    font-weight: 500;
+    font-size: 11px;
+    color: var(--text-secondary, #888);
+    margin: 0 0 6px 0;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .stat-value {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
-    color: #333;
-    margin-bottom: 8px;
+    color: var(--text-primary, #333);
+    margin-bottom: 6px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    letter-spacing: -0.5px;
 }
 
 .stat-trend {
     display: inline-block;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 3px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
     border-radius: 20px;
 }
 
@@ -825,11 +1260,27 @@ body {
 .stat-trend.positive {
     background-color: rgba(76, 175, 80, 0.1);
     color: #4CAF50;
+    display: inline-flex;
+    align-items: center;
+}
+
+.stat-trend.positive:before {
+    content: '↑';
+    margin-right: 4px;
+    font-size: 12px;
 }
 
 .stat-trend.negative {
     background-color: rgba(244, 67, 54, 0.1);
     color: #F44336;
+    display: inline-flex;
+    align-items: center;
+}
+
+.stat-trend.negative:before {
+    content: '↓';
+    margin-right: 4px;
+    font-size: 12px;
 }
 
 .dashboard-charts {
@@ -1131,24 +1582,32 @@ input:checked + .toggle-slider:before {
 .settings-section {
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .settings-section h4 {
-    margin-top: 0;
     margin-bottom: 15px;
-    color: #333333;
+    color: var(--text-color);
+}
+
+.form-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
 .settings-select {
-    width: 100%;
-    padding: 8px;
+    padding: 8px 12px;
     border-radius: 4px;
-    border: 1px solid #ddd;
-    background-color: white;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    width: 160px;
 }
 
-/* Enhanced Table Sorting Indicators */
+
+
 .sortable {
     cursor: pointer;
     position: relative;
@@ -1531,8 +1990,16 @@ button, select, input {
 
 /* Responsive Adjustments */
 @media screen and (max-width: 1200px) {
-    .stat-cards {
-        grid-template-columns: repeat(2, 1fr);
+    .dashboard-stats {
+        flex-wrap: wrap;
+    }
+    
+    .stat-card {
+        flex: 0 0 calc(50% - 8px);
+    }
+    
+    .stat-value {
+        font-size: 24px;
     }
     
     .content-header {
@@ -1570,7 +2037,22 @@ button, select, input {
 }
 
 @media screen and (max-width: 768px) {
-    .sidebar {
+    .stat-card {
+        flex: 0 0 100%;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        padding: 18px;
+    }
+    
+    .stat-icon {
+        width: 45px;
+        height: 45px;
+        margin-right: 16px;
+    }
+    
+    .navigation {
         width: 70px;
     }
     
@@ -1690,4 +2172,68 @@ button {
 
 .products-table-container tr:hover {
     background-color: #f9f9f9;
+}
+
+/* Sale Details Modal Styles */
+.sale-details-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.sale-info, .sale-payment {
+    flex: 1;
+}
+
+.sale-info p, .sale-payment p {
+    margin: 8px 0;
+}
+
+.sale-items-container {
+    margin-bottom: 20px;
+}
+
+.sale-items-container h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.sale-totals {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+}
+
+.total-final {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.sale-notes {
+    margin-top: 20px;
+}
+
+.sale-notes h4 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.sale-notes p {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    border-left: 3px solid #4CAF50;
+    min-height: 40px;
 }

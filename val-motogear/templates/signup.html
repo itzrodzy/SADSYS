@@ -3,41 +3,159 @@
 <head>
     <title>VAL MotorGear - Register</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-    <div class="centered-container">
-        <h2>Register</h2>
-        <form id="signupForm">
-            <input type="text" placeholder="First name" id="first_name" required>
-            <input type="text" placeholder="Last name" id="last_name" required>
-            <input type="email" placeholder="Email" id="email" required>
-            <input type="text" placeholder="Username" id="username" required>
-            <input type="text" placeholder="Phone number" id="phone" required>
-            <input type="text" placeholder="Address" id="address" required>
-            <input type="password" placeholder="Password" id="password" required>
-            <button type="submit">Sign Up</button>
-        </form>
-        <p>Already have an account? <a href="/login">Login here</a></p>
+<body class="auth-page">
+    <div id="notification" class="notification"></div>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-message">Loading...</div>
     </div>
+    
+    <div class="auth-container">
+        <div class="auth-sidebar">
+            <div class="logo">
+                <h2>VAL MotorGear</h2>
+                <p>Inventory System</p>
+            </div>
+            <div class="auth-info">
+                <h3><i class="fas fa-user-plus"></i> Create Account</h3>
+                <p>Join Val MotorGear to manage motorcycle parts inventory with ease.</p>
+                <div class="auth-features">
+                    <div class="feature-item">
+                        <i class="fas fa-motorcycle"></i>
+                        <span>Product Catalog</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Order Processing</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Sales Tracking</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auth-content">
+            <div class="auth-form-container">
+                <h2><i class="fas fa-user-plus"></i> Create Your Account</h2>
+                <p class="auth-subtitle">Fill in your details to get started</p>
+                
+                <form id="signupForm" class="auth-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="first_name"><i class="fas fa-user"></i> First Name</label>
+                            <input type="text" id="first_name" placeholder="Enter first name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last_name"><i class="fas fa-user"></i> Last Name</label>
+                            <input type="text" id="last_name" placeholder="Enter last name" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="email" placeholder="Enter email address" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user-tag"></i> Username</label>
+                        <input type="text" id="username" placeholder="Choose a username" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                            <input type="text" id="phone" placeholder="Enter phone number" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password"><i class="fas fa-lock"></i> Password</label>
+                            <input type="password" id="password" placeholder="Create password" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address"><i class="fas fa-map-marker-alt"></i> Address</label>
+                        <input type="text" id="address" placeholder="Enter your address" required>
+                    </div>
+                    
+                    <button type="submit" class="signup-btn btn-primary">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="/login" class="auth-link">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+    // Show loading overlay function
+    function showLoading(message = 'Loading...') {
+        document.getElementById('loading-overlay').classList.add('active');
+        document.querySelector('.loading-message').textContent = message;
+    }
+    
+    // Hide loading overlay function
+    function hideLoading() {
+        document.getElementById('loading-overlay').classList.remove('active');
+    }
+    
+    // Show notification function
+    function showNotification(message, type = 'success', duration = 3000) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = 'notification';
+        notification.classList.add(type);
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+        }, duration);
+    }
+    
     document.getElementById('signupForm').onsubmit = async function(e) {
         e.preventDefault();
-        const res = await fetch('/api/signup', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                first_name: document.getElementById('first_name').value,
-                last_name: document.getElementById('last_name').value,
-                email: document.getElementById('email').value,
-                username: document.getElementById('username').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
-                password: document.getElementById('password').value
-            })
-        });
-        if (res.ok) window.location.href = '/login';
-        else alert('Signup failed');
-    }
+        showLoading('Creating your account...');
+        
+        try {
+            const res = await fetch('/api/signup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    first_name: document.getElementById('first_name').value,
+                    last_name: document.getElementById('last_name').value,
+                    email: document.getElementById('email').value,
+                    username: document.getElementById('username').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    password: document.getElementById('password').value
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                showNotification('Account created successfully! Redirecting to login...', 'success');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 1500);
+            } else {
+                showNotification(data.message || 'Registration failed. Please try again.', 'error');
+            }
+        } catch (error) {
+            showNotification('An error occurred. Please try again.', 'error');
+        } finally {
+            hideLoading();
+        }
+    };
     </script>
 </body>
 </html>

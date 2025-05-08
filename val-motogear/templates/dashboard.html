@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script defer src="/static/app.js"></script>
+    <script defer src="/static/dashboard-activity.js"></script>
 </head>
 <body>
     <div id="notification" class="notification"></div>
@@ -50,6 +51,7 @@
                 <div class="admin-profile">
                     <img src="https://ui-avatars.com/api/?name=Admin&background=FDC500&color=000" alt="Admin" class="admin-avatar">
                     <span class="admin-name">Admin</span>
+                    <a href="/logout" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 </div>
             </div>
         </header>
@@ -73,7 +75,7 @@
                                 <i class="fas fa-shopping-bag"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>Total Sales</h3>
+                                <h3>TOTAL SALES</h3>
                                 <div class="stat-value" id="sales">0</div>
                                 <div class="stat-trend positive" id="sales-trend">+0%</div>
                             </div>
@@ -83,7 +85,7 @@
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>Revenue</h3>
+                                <h3>REVENUE</h3>
                                 <div class="stat-value" id="revenue">₱0</div>
                                 <div class="stat-trend positive" id="revenue-trend">+0%</div>
                             </div>
@@ -93,7 +95,7 @@
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>Profit</h3>
+                                <h3>PROFIT</h3>
                                 <div class="stat-value" id="profit">₱0</div>
                                 <div class="stat-trend positive" id="profit-trend">+0%</div>
                             </div>
@@ -103,7 +105,7 @@
                                 <i class="fas fa-tags"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>Cost</h3>
+                                <h3>COST</h3>
                                 <div class="stat-value" id="cost">₱0</div>
                                 <div class="stat-trend negative" id="cost-trend">+0%</div>
                             </div>
@@ -117,19 +119,39 @@
                     <div class="dashboard-row">
                         <div class="dashboard-card">
                             <h3 class="card-title">Recent Activity</h3>
-                            <div class="table-container">
-                                <table class="data-table" id="recent-orders-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="sortable" data-sort="id">ID</th>
-                                            <th class="sortable" data-sort="product">Product</th>
-                                            <th class="sortable" data-sort="category">Category</th>
-                                            <th class="sortable" data-sort="status">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="recent-orders-tbody"></tbody>
-                                </table>
+                            <div class="activity-tabs">
+                                <div class="activity-tab active" data-tab="orders">Recent Orders</div>
+                                <div class="activity-tab" data-tab="activity">System Activity</div>
+                                <div class="activity-tab" data-tab="history">Product History</div>
                             </div>
+                            <div class="activity-content" id="orders-content">
+                                <div class="table-container">
+                                    <table class="data-table" id="recent-orders-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="sortable" data-sort="id">ID</th>
+                                                <th class="sortable" data-sort="product">Product</th>
+                                                <th class="sortable" data-sort="category">Category</th>
+                                                <th class="sortable" data-sort="status">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="recent-orders-tbody"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="activity-content hidden" id="activity-content">
+                                <div id="recent-activity" class="activity-list">
+                                    <!-- Activity items will be loaded here -->
+                                    <p class="empty-message">Loading recent activity...</p>
+                                </div>
+                            </div>
+                            <div class="activity-content hidden" id="history-content">
+                                <div id="product-history" class="activity-list">
+                                    <!-- Product history items will be loaded here -->
+                                    <p class="empty-message">Loading product history...</p>
+                                </div>
+                            </div>
+
                         </div>
                         <div class="dashboard-card">
                             <h3 class="card-title">Low Stock Items</h3>
@@ -660,6 +682,7 @@
                         </select>
                     </div>
                 </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" id="reset-settings">Reset to Default</button>
                     <button type="button" class="btn-primary" id="save-settings">Save Settings</button>
@@ -1337,5 +1360,84 @@
             });
         });
     </script>
+    
+    <!-- Sale Details Modal -->
+    <div id="sale-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sale Details</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="sale-details-content">
+                <div class="sale-details-header">
+                    <div class="sale-info">
+                        <p><strong>Sale ID:</strong> <span id="sale-detail-id"></span></p>
+                        <p><strong>Date:</strong> <span id="sale-detail-date"></span></p>
+                        <p><strong>Customer:</strong> <span id="sale-detail-customer"></span></p>
+                    </div>
+                    <div class="sale-payment">
+                        <p><strong>Payment Method:</strong> <span id="sale-detail-payment"></span></p>
+                        <p><strong>Sales Channel:</strong> <span id="sale-detail-channel"></span></p>
+                    </div>
+                </div>
+                
+                <div class="sale-items-container">
+                    <h4>Items Purchased</h4>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Location</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sale-detail-items"></tbody>
+                    </table>
+                </div>
+                
+                <div class="sale-totals">
+                    <div class="total-row">
+                        <span class="total-label">Subtotal:</span>
+                        <span class="total-value" id="sale-detail-subtotal"></span>
+                    </div>
+                    <div class="total-row">
+                        <span class="total-label">Tax:</span>
+                        <span class="total-value" id="sale-detail-tax"></span>
+                    </div>
+                    <div class="total-row total-final">
+                        <span class="total-label">Total:</span>
+                        <span class="total-value" id="sale-detail-total"></span>
+                    </div>
+                </div>
+                
+                <div class="sale-notes">
+                    <h4>Notes</h4>
+                    <p id="sale-detail-notes"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Delete</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this item? This action cannot be undone.</p>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="cancel-delete">Cancel</button>
+                    <button type="button" class="btn-danger" id="confirm-delete" data-type="" data-id="">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Dashboard Activity Module -->
+    <script src="/static/dashboard-activity.js"></script>
 </body>
 </html>
