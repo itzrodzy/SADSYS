@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VAL MotorGear - Inventory Management System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script defer src="/static/app.js"></script>
+</head>
+<body>
+    <div id="notification" class="notification"></div>
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-message">Loading...</div>
+    </div>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>VAL MotorGear</h2>
+            <p>Inventory System</p>
+        </div>
+        <nav class="menu">
+            <a href="#" class="menu-item active" data-tab="dashboard">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="#" class="menu-item" data-tab="inventory">
+                <i class="fas fa-boxes"></i> Inventory
+            </a>
+            <a href="#" class="menu-item" data-tab="products">
+                <i class="fas fa-motorcycle"></i> Products
+            </a>
+            <a href="#" class="menu-item" data-tab="sales">
+                <i class="fas fa-shopping-cart"></i> Sales
+            </a>
+            <a href="#" class="menu-item" data-tab="orders">
+                <i class="fas fa-clipboard-list"></i> Orders
+            </a>
+            <a href="#" class="menu-item" data-tab="reports">
+                <i class="fas fa-file-alt"></i> Reports
+            </a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header class="top-bar">
+            <div class="header-actions">
+                <button id="refresh-btn" title="Refresh current data"><i class="fas fa-sync-alt"></i></button>
+                <button id="settings-btn" title="Settings"><i class="fas fa-cog"></i></button>
+                <div class="admin-profile">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=FDC500&color=000" alt="Admin" class="admin-avatar">
+                    <span class="admin-name">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard-tab">
+                <div class="dashboard-wrapper">
+                    <!-- Dashboard Header -->
+                    <div class="dashboard-header">
+                        <h1>Dashboard</h1>
+                        <div class="dashboard-date">Today: <span id="current-date"></span></div>
+                    </div>
+                    
+
+                    
+                    <!-- Stats Cards -->
+                    <div class="dashboard-stats">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-shopping-bag"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Total Sales</h3>
+                                <div class="stat-value" id="sales">0</div>
+                                <div class="stat-trend positive" id="sales-trend">+0%</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Revenue</h3>
+                                <div class="stat-value" id="revenue">₱0</div>
+                                <div class="stat-trend positive" id="revenue-trend">+0%</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Profit</h3>
+                                <div class="stat-value" id="profit">₱0</div>
+                                <div class="stat-trend positive" id="profit-trend">+0%</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-tags"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>Cost</h3>
+                                <div class="stat-value" id="cost">₱0</div>
+                                <div class="stat-trend negative" id="cost-trend">+0%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Main Dashboard Content Area -->
+                    <div class="dashboard-section-header">
+                        <h2>Dashboard Overview</h2>
+                    </div>
+                    <div class="dashboard-row">
+                        <div class="dashboard-card">
+                            <h3 class="card-title">Recent Activity</h3>
+                            <div class="table-container">
+                                <table class="data-table" id="recent-orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="sortable" data-sort="id">ID</th>
+                                            <th class="sortable" data-sort="product">Product</th>
+                                            <th class="sortable" data-sort="category">Category</th>
+                                            <th class="sortable" data-sort="status">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-orders-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 class="card-title">Low Stock Items</h3>
+                            <div id="low-stock-items" class="low-stock-container">
+                                <p>Loading low stock items...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Insights Section -->
+                    <div class="dashboard-card full-width">
+                        <h3 class="card-title">System Insights</h3>
+                        <div class="insights-container" id="system-insights">
+                            <div class="insight">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Analyzing your inventory data...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Tab -->
+            <div class="tab-content" id="inventory-tab">
+                <div class="content-header">
+                    <h1>Inventory Management</h1>
+                    <button id="add-inventory-btn" class="btn-primary"><i class="fas fa-plus"></i> Add Inventory</button>
+                </div>
+                <div class="filter-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="inventory-search" placeholder="Search inventory...">
+                    </div>
+                    <div class="filter-options">
+                        <select id="inventory-category-filter">
+                            <option value="">All Categories</option>
+                            <option value="Helmets">Helmets</option>
+                            <option value="Jackets">Jackets</option>
+                            <option value="Gloves">Gloves</option>
+                            <option value="Boots">Boots</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                        <select id="inventory-status-filter">
+                            <option value="">All Status</option>
+                            <option value="In Stock">In Stock</option>
+                            <option value="Low Stock">Low Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-table-container">
+                    <table id="inventory-table" class="data-table sortable-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="id">ID</th>
+                                <th class="sortable" data-sort="product">Product</th>
+                                <th class="sortable" data-sort="category">Category</th>
+                                <th class="sortable" data-sort="quantity">Quantity</th>
+                                <th class="sortable" data-sort="status">Status</th>
+                                <th class="sortable" data-sort="updated">Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventory-tbody"></tbody>
+                    </table>
+                </div>
+                <!-- Inventory Form Modal -->
+                <div id="inventory-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="inventory-modal-title">Add Inventory</h3>
+                            <span class="close-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="inventory-form">
+                                <input type="hidden" id="inventory-id">
+                                <div class="form-group">
+                                    <label for="inventory-product">Product:</label>
+                                    <select id="inventory-product" required></select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inventory-quantity">Quantity:</label>
+                                    <input type="number" id="inventory-quantity" min="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inventory-location">Storage Location:</label>
+                                    <input type="text" id="inventory-location">
+                                </div>
+                                <div class="form-group">
+                                    <label for="inventory-status">Status:</label>
+                                    <select id="inventory-status" required>
+                                        <option value="In Stock">In Stock</option>
+                                        <option value="Low Stock">Low Stock</option>
+                                        <option value="Out of Stock">Out of Stock</option>
+                                        <option value="Backorder">Backorder</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="inventory-notes">Notes:</label>
+                                    <textarea id="inventory-notes"></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" id="cancel-inventory">Cancel</button>
+                                    <button type="submit" class="btn-primary">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Tab -->
+            <div class="tab-content" id="products-tab">
+                <div class="content-header">
+                    <h1>Product Catalog</h1>
+                    <button id="add-product-btn" class="btn-primary"><i class="fas fa-plus"></i> Add Product</button>
+                </div>
+                <div class="filter-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="product-search" placeholder="Search products...">
+                    </div>
+                    <div class="filter-options">
+                        <select id="product-category-filter">
+                            <option value="">All Categories</option>
+                            <option value="Helmets">Helmets</option>
+                            <option value="Jackets">Jackets</option>
+                            <option value="Gloves">Gloves</option>
+                            <option value="Boots">Boots</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-table-container">
+                    <table id="products-table" class="data-table sortable-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="id">ID</th>
+                                <th class="sortable" data-sort="name">Name</th>
+                                <th class="sortable" data-sort="brand">Brand</th>
+                                <th class="sortable" data-sort="category">Category</th>
+                                <th class="sortable" data-sort="price">Price</th>
+                                <th class="sortable" data-sort="quantity">Quantity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody"></tbody>
+                    </table>
+                </div>
+                <!-- Product Form Modal -->
+                <div id="product-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="product-modal-title">Add Product</h3>
+                            <span class="close-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="product-form">
+                                <input type="hidden" id="product-id">
+                                <div class="form-group">
+                                    <label for="product-name">Product Name:</label>
+                                    <input type="text" id="product-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-brand">Brand:</label>
+                                    <input type="text" id="product-brand" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-category">Category:</label>
+                                    <select id="product-category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Helmets">Helmets</option>
+                                        <option value="Jackets">Jackets</option>
+                                        <option value="Gloves">Gloves</option>
+                                        <option value="Boots">Boots</option>
+                                        <option value="Accessories">Accessories</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-price">Price:</label>
+                                    <input type="number" id="product-price" min="0" step="0.01" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-quantity">Quantity:</label>
+                                    <input type="number" id="product-quantity" min="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="product-description">Description:</label>
+                                    <textarea id="product-description"></textarea>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" id="cancel-product">Cancel</button>
+                                    <button type="submit" class="btn-primary">Save</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Tab -->
+            <div class="tab-content" id="sales-tab">
+                <div class="content-header">
+                    <h1>Sales Management</h1>
+                    <button id="add-sale-btn" class="btn-primary"><i class="fas fa-plus"></i> Record Sale</button>
+                </div>
+                <div class="filter-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="sales-search" placeholder="Search sales...">
+                    </div>
+                    <div class="filter-options">
+                        <input type="date" id="sales-date-filter">
+                        <select id="sales-channel-filter">
+                            <option value="">All Channels</option>
+                            <option value="In-Store">In-Store</option>
+                            <option value="Online">Online</option>
+                            <option value="Wholesaler">Wholesaler</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-table-container">
+                    <table id="sales-table" class="data-table sortable-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="id">ID</th>
+                                <th class="sortable" data-sort="date">Date</th>
+                                <th class="sortable" data-sort="customer">Customer</th>
+                                <th class="sortable" data-sort="products">Products</th>
+                                <th class="sortable" data-sort="location">Location</th>
+                                <th class="sortable" data-sort="total">Total</th>
+                                <th class="sortable" data-sort="payment">Payment Method</th>
+                                <th class="sortable" data-sort="channel">Channel</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sales-tbody"></tbody>
+                    </table>
+                </div>
+                <!-- Sales Form Modal -->
+                <div id="sales-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Record Sale</h2>
+                            <span class="close" onclick="closeModal('sales-modal')">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="sales-form">
+                                <div class="form-group">
+                                    <label for="sale-date">Date:</label>
+                                    <input type="date" id="sale-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sale-customer">Customer:</label>
+                                    <input type="text" id="sale-customer">
+                                </div>
+                                <div class="form-group">
+                                    <label>Products:</label>
+                                    <div id="sale-products-container">
+                                        <div class="sale-product-row">
+                                            <select class="sale-product" required>
+                                                <option value="">Select Product</option>
+                                            </select>
+                                            <input type="number" class="sale-quantity" min="1" value="1" required>
+                                            <span class="sale-price">₱0.00</span>
+                                            <button type="button" class="remove-product"><i class="fas fa-times"></i></button>
+                                        </div>
+                                    </div>
+                                    <button type="button" id="add-sale-product" class="btn-secondary"><i class="fas fa-plus"></i> Add Product</button>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sale-payment">Payment Method:</label>
+                                    <select id="sale-payment" required>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Credit Card">Credit Card</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="GCash">GCash</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sale-channel">Sales Channel:</label>
+                                    <select id="sale-channel" required>
+                                        <option value="In-Store">In-Store</option>
+                                        <option value="Online">Online</option>
+                                        <option value="Wholesaler">Wholesaler</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sale-notes">Notes:</label>
+                                    <textarea id="sale-notes"></textarea>
+                                </div>
+                                <div class="sale-summary">
+                                    <div class="summary-item">
+                                        <span>Subtotal:</span>
+                                        <span id="sale-subtotal">₱0.00</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span>Tax (12%):</span>
+                                        <span id="sale-tax">₱0.00</span>
+                                    </div>
+                                    <div class="summary-item total">
+                                        <span>Total:</span>
+                                        <span id="sale-total">₱0.00</span>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" id="cancel-sale">Cancel</button>
+                                    <button type="submit" class="btn-primary">Complete Sale</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div class="tab-content" id="orders-tab">
+                <div class="content-header">
+                    <h1>Order Management</h1>
+                    <button id="add-order-btn" class="btn-primary"><i class="fas fa-plus"></i> New Order</button>
+                </div>
+                <div class="filter-container">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="orders-search" placeholder="Search orders...">
+                    </div>
+                    <div class="filter-options">
+                        <select id="orders-status-filter">
+                            <option value="">All Status</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="data-table-container">
+                    <table id="orders-table" class="data-table sortable-table">
+                        <thead>
+                            <tr>
+                                <th class="sortable" data-sort="id">ID</th>
+                                <th class="sortable" data-sort="date">Date</th>
+                                <th class="sortable" data-sort="product">Product</th>
+                                <th class="sortable" data-sort="category">Category</th>
+                                <th class="sortable" data-sort="channel">Sales Channel</th>
+                                <th class="sortable" data-sort="instructions">Instructions</th>
+                                <th class="sortable" data-sort="items">Items</th>
+                                <th class="sortable" data-sort="status">Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody"></tbody>
+                    </table>
+                </div>
+                <!-- Order Form Modal -->
+                <div id="notification" class="notification"></div>
+                <div id="loading-overlay" class="loading-overlay">
+                    <div class="spinner"></div>
+                    <div class="loading-message">Loading...</div>
+                </div>
+                <div id="order-modal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="order-modal-title">New Order</h3>
+                            <span class="close-modal">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <form id="order-form">
+                                <input type="hidden" id="order-id">
+                                <div class="form-group">
+                                    <label for="order-product">Product:</label>
+                                    <input type="text" id="order-product" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="order-category">Category:</label>
+                                    <select id="order-category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Helmets">Helmets</option>
+                                        <option value="Jackets">Jackets</option>
+                                        <option value="Gloves">Gloves</option>
+                                        <option value="Boots">Boots</option>
+                                        <option value="Accessories">Accessories</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="order-channel">Sales Channel:</label>
+                                    <select id="order-channel" required>
+                                        <option value="">Select Channel</option>
+                                        <option value="In-Store">In-Store</option>
+                                        <option value="Online">Online</option>
+                                        <option value="Wholesaler">Wholesaler</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="order-instructions">Instructions:</label>
+                                    <textarea id="order-instructions"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="order-items">Items:</label>
+                                    <input type="number" id="order-items" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="order-status">Status:</label>
+                                    <select id="order-status" required>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Processing">Processing</option>
+                                        <option value="Shipped">Shipped</option>
+                                        <option value="Delivered">Delivered</option>
+                                        <option value="Cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="button" class="btn-secondary" id="cancel-order">Cancel</button>
+                                    <button type="submit" class="btn-primary">Save Order</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div class="tab-content" id="reports-tab">
+                <div class="content-header">
+                    <h1>Reports & Analytics</h1>
+                </div>
+                <div class="reports-container">
+                    <div class="report-options">
+                        <h3>Generate Report</h3>
+                        <div class="form-group">
+                            <label for="report-type">Report Type:</label>
+                            <select id="report-type">
+                                <option value="sales">Sales Report</option>
+                                <option value="inventory">Inventory Report</option>
+                                <option value="product">Product Performance</option>
+                                <option value="category">Category Analysis</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="report-period">Time Period:</label>
+                            <select id="report-period">
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                                <option value="yearly">Yearly</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="date-range" id="custom-date-range" style="display: none;">
+                            <div class="form-group">
+                                <label for="report-start-date">Start Date:</label>
+                                <input type="date" id="report-start-date">
+                            </div>
+                            <div class="form-group">
+                                <label for="report-end-date">End Date:</label>
+                                <input type="date" id="report-end-date">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="report-format">Format:</label>
+                            <select id="report-format">
+                                <option value="csv">CSV</option>
+                                <option value="pdf">PDF</option>
+                                <option value="screen">View on Screen</option>
+                            </select>
+                        </div>
+                        <button id="generate-report-btn" class="btn-primary">Generate Report</button>
+                    </div>
+                    <div class="report-preview">
+                        <h3>Report Preview</h3>
+                        <div id="report-content">
+                            <p class="placeholder-text">Select options and generate a report to see preview</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>System Settings</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h4>Display Options</h4>
+                    <div class="form-group">
+                        <label for="dark-mode-toggle">Dark Mode</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dark-mode-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="compact-view-toggle">Compact View</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="compact-view-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>System Preferences</h4>
+                    <div class="form-group">
+                        <label for="notification-setting">Notifications</label>
+                        <select id="notification-setting" class="settings-select">
+                            <option value="all">All Notifications</option>
+                            <option value="important">Important Only</option>
+                            <option value="none">Disabled</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="auto-refresh">Auto Refresh (minutes)</label>
+                        <select id="auto-refresh" class="settings-select">
+                            <option value="0">Disabled</option>
+                            <option value="1">1</option>
+                            <option value="5">5</option>
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" id="reset-settings">Reset to Default</button>
+                    <button type="button" class="btn-primary" id="save-settings">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Show loading overlay
+        function showLoading(message = 'Loading...') {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const loadingMessage = document.querySelector('.loading-message');
+            if (loadingMessage) loadingMessage.textContent = message;
+            if (loadingOverlay) loadingOverlay.classList.add('show');
+        }
+        
+        // Hide loading overlay
+        function hideLoading() {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) loadingOverlay.classList.remove('show');
+        }
+        
+        // Enhanced notification system
+        function showNotification(message, type = 'success', duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification';
+            notification.classList.add(type);
+            notification.classList.add('show');
+            
+            setTimeout(function() {
+                notification.classList.remove('show');
+            }, duration);
+        }
+        
+        // Show a modal centered on screen
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            
+            // First reset all modals
+            document.querySelectorAll('.modal').forEach(m => {
+                m.style.display = 'none';
+                m.classList.remove('show');
+            });
+            
+            // Then show this one with proper centering
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+            
+            // Ensure the form is reset if it exists
+            const form = modal.querySelector('form');
+            if (form) form.reset();
+            
+            // Ensure proper modal positioning
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.opacity = '0';
+                setTimeout(() => {
+                    modalContent.style.opacity = '1';
+                }, 50);
+            }
+        }
+        
+        // Hide a modal
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            
+            // Fade out animation then hide
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) {
+                modalContent.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    modal.classList.remove('show');
+                }, 200);
+            } else {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+            }
+        }
+        
+        // Filter function for tables
+        function filterTable(tableId, searchTerm) {
+            const tbody = document.getElementById(tableId);
+            if (!tbody) return;
+            
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm.toLowerCase())) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix low stock items issue
+            fetch('/api/inventory?low_stock=true')
+                .then(res => res.json())
+                .then(data => {
+                    const lowStockContainer = document.getElementById('low-stock-items');
+                    if (lowStockContainer) {
+                        if (data.inventory && data.inventory.length > 0) {
+                            lowStockContainer.innerHTML = '';
+                            data.inventory.slice(0, 5).forEach(item => {
+                                lowStockContainer.innerHTML += `
+                                    <div class="low-stock-item">
+                                        <div class="low-stock-info">
+                                            <div class="low-stock-name">${item.name || 'Unknown Product'}</div>
+                                            <div class="low-stock-meta">${item.category || 'No Category'}</div>
+                                        </div>
+                                        <div class="low-stock-quantity">${item.quantity}</div>
+                                    </div>
+                                `;
+                            });
+                        } else {
+                            lowStockContainer.innerHTML = '<p>No low stock items found.</p>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching low stock items:', error);
+                    const lowStockContainer = document.getElementById('low-stock-items');
+                    if (lowStockContainer) {
+                        lowStockContainer.innerHTML = '<p>Error loading low stock items.</p>';
+                    }
+                });
+                
+            // Fix search engines
+            // Inventory search
+            const inventorySearch = document.getElementById('inventory-search');
+            if (inventorySearch) {
+                inventorySearch.addEventListener('input', function() {
+                    filterTable('inventory-tbody', this.value);
+                });
+            }
+            
+            // Products search
+            const productsSearch = document.getElementById('products-search');
+            if (productsSearch) {
+                productsSearch.addEventListener('input', function() {
+                    filterTable('products-tbody', this.value);
+                });
+            }
+            
+            // Fix filter dropdowns
+            // Inventory category filter
+            const inventoryCategoryFilter = document.getElementById('inventory-category-filter');
+            if (inventoryCategoryFilter) {
+                inventoryCategoryFilter.addEventListener('change', function() {
+                    const value = this.value;
+                    const rows = document.querySelectorAll('#inventory-tbody tr');
+                    
+                    rows.forEach(row => {
+                        if (!value || row.querySelector('td:nth-child(3)').textContent.includes(value)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // Inventory status filter
+            const inventoryStatusFilter = document.getElementById('inventory-status-filter');
+            if (inventoryStatusFilter) {
+                inventoryStatusFilter.addEventListener('change', function() {
+                    const value = this.value;
+                    const rows = document.querySelectorAll('#inventory-tbody tr');
+                    
+                    rows.forEach(row => {
+                        // If 'All Status' is selected or the status matches
+                        if (!value || row.querySelector('td:nth-child(5)').textContent.includes(value)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                    
+                    // Apply the category filter as well if it's set
+                    if (inventoryCategoryFilter.value) {
+                        const categoryValue = inventoryCategoryFilter.value;
+                        rows.forEach(row => {
+                            if (row.style.display !== 'none' && !row.querySelector('td:nth-child(3)').textContent.includes(categoryValue)) {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Products category filter
+            const productsCategoryFilter = document.getElementById('product-category-filter'); // Fixed ID
+            if (productsCategoryFilter) {
+                productsCategoryFilter.addEventListener('change', function() {
+                    const value = this.value;
+                    const rows = document.querySelectorAll('#products-tbody tr');
+                    
+                    // Fix for 'All Categories'
+                    if (!value) {
+                        // Show all rows when 'All Categories' is selected
+                        rows.forEach(row => {
+                            row.style.display = '';
+                        });
+                        
+                        // Also update the search filter if text is in the search box
+                        const searchBox = document.getElementById('product-search');
+                        if (searchBox && searchBox.value) {
+                            filterTable('products-tbody', searchBox.value);
+                        }
+                    } else {
+                        // Filter by the selected category
+                        rows.forEach(row => {
+                            // Fix the column index to match the category column (4th column in products table)
+                            const categoryCell = row.querySelector('td:nth-child(4)');
+                            if (categoryCell && categoryCell.textContent.includes(value)) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        });
+                    }
+                });
+                
+                // Reset filter on page load
+                productsCategoryFilter.value = '';
+            }
+            
+            // Sales channel filter
+            const salesChannelFilter = document.getElementById('sales-channel-filter');
+            if (salesChannelFilter) {
+                salesChannelFilter.addEventListener('change', function() {
+                    const value = this.value;
+                    const rows = document.querySelectorAll('#sales-tbody tr');
+                    
+                    rows.forEach(row => {
+                        if (!value || row.querySelector('td:nth-child(8)').textContent.includes(value)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // Fix settings button
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', function() {
+                    showModal('settings-modal');
+                });
+                
+                // Settings save button
+                const saveSettingsBtn = document.getElementById('save-settings');
+                if (saveSettingsBtn) {
+                    saveSettingsBtn.addEventListener('click', function() {
+                        hideModal('settings-modal');
+                        showNotification('Settings saved successfully');
+                    });
+                }
+                
+                // Settings reset button
+                const resetSettingsBtn = document.getElementById('reset-settings');
+                if (resetSettingsBtn) {
+                    resetSettingsBtn.addEventListener('click', function() {
+                        // Reset form elements
+                        document.getElementById('dark-mode-toggle').checked = false;
+                        document.getElementById('compact-view-toggle').checked = false;
+                        document.getElementById('notification-setting').value = 'all';
+                        document.getElementById('auto-refresh').value = '0';
+                        
+                        showNotification('Settings reset to defaults');
+                    });
+                }
+            }
+            
+            // Fix Record Sale button positioning
+            const addSaleBtn = document.getElementById('add-sale-btn');
+            if (addSaleBtn) {
+                addSaleBtn.addEventListener('click', function() {
+                    showModal('sales-modal');
+                    
+                    // Load products for sale
+                    fetch('/api/inventory')
+                        .then(res => res.json())
+                        .then(data => {
+                            const productsContainer = document.getElementById('sale-products-container');
+                            if (productsContainer) {
+                                productsContainer.innerHTML = '';
+                                if (data.inventory && data.inventory.length > 0) {
+                                    data.inventory.forEach(item => {
+                                        const productElement = document.createElement('div');
+                                        productElement.className = 'sale-product-item';
+                                        productElement.innerHTML = `
+                                            <div class="product-info">
+                                                <div class="product-name">${item.name}</div>
+                                                <div class="product-meta">${item.category} - ${item.location}</div>
+                                            </div>
+                                            <div class="product-price">₱${item.price}</div>
+                                            <div class="quantity-control">
+                                                <input type="number" min="0" max="${item.quantity}" value="0" class="quantity-input" data-id="${item.id}" data-price="${item.price}">
+                                            </div>
+                                        `;
+                                        productsContainer.appendChild(productElement);
+                                    });
+                                    
+                                    // Add quantity change event listeners
+                                    const quantityInputs = document.querySelectorAll('.quantity-input');
+                                    quantityInputs.forEach(input => {
+                                        input.addEventListener('change', updateSaleSummary);
+                                    });
+                                } else {
+                                    productsContainer.innerHTML = '<p>No products available for sale.</p>';
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading products for sale:', error);
+                        });
+                });
+            }
+            
+            // Fix Add Inventory button
+            const addInventoryBtn = document.getElementById('add-inventory-btn');
+            if (addInventoryBtn) {
+                addInventoryBtn.addEventListener('click', function() {
+                    showModal('inventory-modal');
+                    
+                    // Clear the form
+                    const form = document.getElementById('inventory-form');
+                    if (form) form.reset();
+                    
+                    // Load products for inventory
+                    fetch('/api/products')
+                        .then(res => res.json())
+                        .then(data => {
+                            const productSelect = document.getElementById('inventory-product');
+                            if (productSelect) {
+                                productSelect.innerHTML = '<option value="">Select Product</option>';
+                                if (data.products && data.products.length > 0) {
+                                    data.products.forEach(product => {
+                                        productSelect.innerHTML += `<option value="${product.id}">${product.name}</option>`;
+                                    });
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading products for inventory:', error);
+                        });
+                });
+            }
+            
+            // Fix Add Order button
+            const addOrderBtn = document.getElementById('add-order-btn');
+            if (addOrderBtn) {
+                addOrderBtn.addEventListener('click', function() {
+                    showModal('order-modal');
+                    
+                    // Clear the form
+                    const form = document.getElementById('order-form');
+                    if (form) form.reset();
+                });
+            }
+            
+            // Close modals when clicking on X or outside
+            const closeButtons = document.querySelectorAll('.close-modal');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    if (modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            });
+            
+            window.addEventListener('click', function(event) {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (event.target === modal) {
+                        modal.classList.remove('show');
+                    }
+                });
+            });
+            
+            // Initialize all modals
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.remove('show');
+            });
+            
+            // Set current date
+            const currentDateElement = document.getElementById('current-date');
+            if (currentDateElement) {
+                const now = new Date();
+                currentDateElement.textContent = now.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            }
+            // ===== Order Status Filter =====
+            const statusFilter = document.getElementById('orders-status-filter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    // Get filter value
+                    const statusValue = this.value;
+                    
+                    // Construct API URL with status filter
+                    let url = '/api/orders';
+                    if (statusValue) {
+                        url += `?status=${statusValue}`;
+                    }
+                    
+                    // Fetch filtered orders
+                    fetch(url)
+                        .then(res => res.json())
+                        .then(data => {
+                            // Update orders table with filtered data
+                            const orders = data.orders || [];
+                            updateOrdersTable(orders);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching filtered orders:', error);
+                        });
+                });
+            }
+
+            // ===== Search Functionality =====
+            // Orders search
+            const ordersSearch = document.getElementById('orders-search');
+            if (ordersSearch) {
+                ordersSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const ordersTable = document.getElementById('orders-tbody');
+                    const rows = ordersTable.querySelectorAll('tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+            
+            // Sales search
+            const salesSearch = document.getElementById('sales-search');
+            if (salesSearch) {
+                salesSearch.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const salesTable = document.getElementById('sales-tbody');
+                    const rows = salesTable.querySelectorAll('tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        if (text.includes(searchTerm)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // ===== Table Sorting =====
+            const sortableHeaders = document.querySelectorAll('th.sortable');
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const sortField = this.getAttribute('data-sort');
+                    const tableId = this.closest('table').id;
+                    const tbody = document.getElementById(tableId.replace('table', 'tbody'));
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    
+                    // Toggle sort direction
+                    const currentDirection = this.getAttribute('data-direction') || 'asc';
+                    const newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+                    
+                    // Remove direction from all headers
+                    sortableHeaders.forEach(h => h.removeAttribute('data-direction'));
+                    
+                    // Set direction on current header
+                    this.setAttribute('data-direction', newDirection);
+                    
+                    // Update visual indicators
+                    sortableHeaders.forEach(h => {
+                        h.classList.remove('sorted-asc', 'sorted-desc');
+                    });
+                    this.classList.add(`sorted-${newDirection}`);
+                    
+                    // Sort the rows
+                    rows.sort((rowA, rowB) => {
+                        const cellA = rowA.querySelector(`td:nth-child(${Array.from(this.parentNode.children).indexOf(this) + 1})`);
+                        const cellB = rowB.querySelector(`td:nth-child(${Array.from(this.parentNode.children).indexOf(this) + 1})`);
+                        
+                        if (!cellA || !cellB) return 0;
+                        
+                        let valueA = cellA.textContent.trim();
+                        let valueB = cellB.textContent.trim();
+                        
+                        // Handle numeric values
+                        if (!isNaN(valueA) && !isNaN(valueB)) {
+                            valueA = parseFloat(valueA);
+                            valueB = parseFloat(valueB);
+                        }
+                        
+                        if (newDirection === 'asc') {
+                            return valueA > valueB ? 1 : -1;
+                        } else {
+                            return valueA < valueB ? 1 : -1;
+                        }
+                    });
+                    
+                    // Re-append rows in sorted order
+                    rows.forEach(row => tbody.appendChild(row));
+                });
+            });
+            
+            // ===== Refresh Button =====
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    this.classList.add('rotating');
+                    
+                    // Determine which tab is active
+                    const activeTab = document.querySelector('.tab-content.active').id;
+                    const tabName = activeTab.replace('-tab', '');
+                    
+                    // Refresh appropriate data
+                    switch(tabName) {
+                        case 'dashboard':
+                            fetch('/api/dashboard')
+                                .then(res => res.json())
+                                .then(data => {
+                                    // Update dashboard stats
+                                    if (data.stats) {
+                                        document.getElementById('total-sales').textContent = data.stats.total_sales || 0;
+                                        document.getElementById('total-revenue').textContent = `₱${(data.stats.total_revenue || 0).toFixed(2)}`;
+                                        document.getElementById('total-profit').textContent = `₱${(data.stats.total_profit || 0).toFixed(2)}`;
+                                        document.getElementById('total-cost').textContent = `₱${(data.stats.total_cost || 0).toFixed(2)}`;
+                                    }
+                                    // Update recent orders
+                                    if (data.orders) {
+                                        updateOrdersTable(data.orders);
+                                    }
+                                    // Update recent sales
+                                    if (data.sales) {
+                                        updateSalesTable(data.sales);
+                                    }
+                                });
+                            break;
+                        case 'inventory':
+                            fetch('/api/inventory')
+                                .then(res => res.json())
+                                .then(data => {
+                                    updateInventoryTable(data.inventory || []);
+                                });
+                            break;
+                        case 'products':
+                            fetch('/api/products')
+                                .then(res => res.json())
+                                .then(data => {
+                                    updateProductsTable(data.products || []);
+                                });
+                            break;
+                        case 'sales':
+                            fetch('/api/sales')
+                                .then(res => res.json())
+                                .then(data => {
+                                    updateSalesTable(data.sales || []);
+                                });
+                            break;
+                        case 'orders':
+                            fetch('/api/orders')
+                                .then(res => res.json())
+                                .then(data => {
+                                    updateOrdersTable(data.orders || []);
+                                });
+                            break;
+                    }
+                    
+                    // Remove rotating animation after 1 second
+                    setTimeout(() => {
+                        this.classList.remove('rotating');
+                        alert('Data refreshed successfully');
+                    }, 1000);
+                });
+            }
+            
+            // ===== Sales Action Buttons =====
+            document.addEventListener('click', function(e) {
+                // Handle edit sale button clicks
+                if (e.target.closest('.edit-btn') && e.target.closest('#sales-tbody')) {
+                    const saleId = e.target.closest('.edit-btn').getAttribute('data-id');
+                    if (saleId) {
+                        // Fetch sale details and open edit modal
+                        fetch(`/api/sales/${saleId}`)
+                            .then(res => res.json())
+                            .then(sale => {
+                                if (sale) {
+                                    // Fill in sale edit form
+                                    document.getElementById('sale-id').value = sale.id;
+                                    document.getElementById('sale-customer').value = sale.customer || '';
+                                    document.getElementById('sale-payment').value = sale.payment_method || '';
+                                    document.getElementById('sale-channel').value = sale.sales_channel || '';
+                                    
+                                    // Update modal title
+                                    document.getElementById('sales-modal-title').textContent = 'Edit Sale';
+                                    
+                                    // Show the modal
+                                    const modal = document.getElementById('sales-modal');
+                                    if (modal) modal.style.display = 'block';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching sale details:', error);
+                                alert('Error fetching sale details');
+                            });
+                    }
+                }
+                
+                // Handle delete sale button clicks
+                if (e.target.closest('.delete-btn') && e.target.closest('#sales-tbody')) {
+                    const saleId = e.target.closest('.delete-btn').getAttribute('data-id');
+                    if (saleId && confirm('Are you sure you want to delete this sale?')) {
+                        // Delete the sale
+                        fetch(`/api/sales/${saleId}`, {
+                            method: 'DELETE'
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.message) {
+                                    alert(data.message);
+                                    // Refresh sales data
+                                    fetch('/api/sales')
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            updateSalesTable(data.sales || []);
+                                        });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error deleting sale:', error);
+                                alert('Error deleting sale');
+                            });
+                    }
+                }
+                
+                // Add Sale button click
+                if (e.target.closest('#add-sale-btn')) {
+                    // Clear the form
+                    const saleForm = document.getElementById('sale-form');
+                    if (saleForm) saleForm.reset();
+                    
+                    // Reset hidden ID field
+                    const saleIdField = document.getElementById('sale-id');
+                    if (saleIdField) saleIdField.value = '';
+                    
+                    // Update modal title
+                    const modalTitle = document.getElementById('sales-modal-title');
+                    if (modalTitle) modalTitle.textContent = 'Record Sale';
+                    
+                    // Show the modal
+                    const modal = document.getElementById('sales-modal');
+                    if (modal) modal.style.display = 'block';
+                    
+                    // Load products for sale
+                    loadProductsForSale();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

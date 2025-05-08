@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VAL MotorGear - Login</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="centered-container">
+        <h2>Welcome to VAL MotoGear</h2>
+        <form id="loginForm">
+            <label>Username</label>
+            <input type="text" id="username" required>
+            <label>Password</label>
+            <input type="password" id="password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/signup">Create a new account</a></p>
+    </div>
+    <script>
+    document.getElementById('loginForm').onsubmit = async function(e) {
+        e.preventDefault();
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            })
+        });
+        if (res.ok) window.location.href = '/dashboard';
+        else alert('Login failed');
+    }
+    </script>
+</body>
+</html>
